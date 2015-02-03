@@ -9,6 +9,7 @@
             [ring.middleware.json :refer [wrap-json-params wrap-json-response]]
             [bidi.ring :refer [make-handler ->Resources]]
             [taoensso.tower.ring :refer [wrap-tower]]
+            [d-cent.middleware.reload :as reload]
             [d-cent.config :as config]
             [d-cent.translation :refer [translation-config]]
             [d-cent.storage :as storage]
@@ -90,10 +91,20 @@
    :translation translation-config
    :store in-memory-db})
 
+(def configured-app (app app-config))
+
+
+;;TODO Auto-reload interacts badly with friend/auth ?
+;;(config/get-var "DEV")
+(def in-dev? false)
+
 (defn start-server []
   (let [port (Integer/parseInt (config/get-var "PORT" "8080"))]
     (log/info (str "Starting d-cent on port " port))
-    (reset! server (run-server (app app-config) {:port port}))))
+    (reset! server (run-server (if in-dev?
+                                  (reload/wrap-reload #'configured-app {:always-reload ['d-cent.responses 'd-cent.core]})
+                                  configured-app)
+                                {:port port}))))
 
 (defn -main []
   (start-server))
@@ -106,3 +117,4 @@
 (defn restart-server []
   (stop-server)
   (start-server))
+

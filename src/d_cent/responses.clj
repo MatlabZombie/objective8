@@ -6,7 +6,7 @@
 (def google-analytics-tracking-id (config/get-var "GA_TRACKING_ID"))
 
 ;GOOGLE ANALYTICS
-(html/defsnippet google-analytics 
+(html/defsnippet google-analytics
   "templates/google-analytics.html" [[:#clj-google-analytics]] [tracking-id]
   (html/transform-content (html/replace-vars {:trackingID tracking-id})))
 
@@ -39,20 +39,20 @@
                   [:body] (html/append (if google-analytics-tracking-id (google-analytics google-analytics-tracking-id))))
 
 ;NAVIGATION
-(html/defsnippet global-navigation-signed-in 
+(html/defsnippet global-navigation-signed-in
   "templates/navigation-global-signed-in.html" [[:.global-navigation]] [{:keys [translation]}]
   [:#clj-sign-out-link] (html/content (translation :navigation-global/sign-out-text))
   [:#clj-sign-out-link-title] (html/set-attr :title (translation :navigation-global/sign-out-title))
   [:#clj-user-profile-link] (html/content (translation :navigation-global/profile-text))
   [:#clj-user-profile-link] (html/set-attr :title (translation :navigation-global/profile-title)))
 
-(html/defsnippet global-navigation-signed-out 
+(html/defsnippet global-navigation-signed-out
   "templates/navigation-global-signed-out.html" [[:.global-navigation]] [{:keys [translation]}]
   [:#clj-sign-in-link] (html/content (translation :navigation-global/sign-in-text))
   [:#clj-sign-in-link-title] (html/set-attr :title (translation :navigation-global/sign-in-title)))
 
 ;HOME/INDEX
-(html/defsnippet index-page 
+(html/defsnippet index-page
   "templates/index.html" [[:#clj-index]] [{:keys [translation]}]
   [:.index-welcome] (html/content (translation :index/index-welcome))
   [:.index-intro] (html/content (translation :index/index-intro))
@@ -62,7 +62,7 @@
   [:.index-learn-more] (html/set-attr :title (translation :index/index-learn-more-title)))
 
 ;SIGN IN
-(html/defsnippet sign-in-page 
+(html/defsnippet sign-in-page
   "templates/sign-in.html" [[:#clj-sign-in-page]] [{:keys [translation]}]
   [:h1] (html/content (translation :sign-in/page-title))
   [:#clj-sign-in-twitter] (html/set-attr :value (translation :sign-in/twitter-sign-in-btn))
@@ -70,7 +70,7 @@
 
 
 ;OBJECTIVES
-(html/defsnippet objective-create-page 
+(html/defsnippet objective-create-page
   "templates/objectives-create.html" [[:#clj-objective-create]] [{:keys [translation]}]
   [:h1] (html/content (translation :objective-create/page-title))
   [(html/attr= :for "objective-title")] (html/content (translation :objective-create/title-label))
@@ -94,7 +94,7 @@
                                                                        [:#clj-obj-end-date-value] (html/content (:end-date objective)))
 
 ;USERS
-(html/defsnippet users-email 
+(html/defsnippet users-email
   "templates/users-email.html" [[:#clj-users-email]] [{:keys [translation]}]
   [:h1] (html/content (translation :users-email/page-title))
   [:.clj-user-email-welcome] (html/content (translation :users-email/user-email-welcome))

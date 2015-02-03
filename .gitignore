@@ -12,3 +12,4 @@ ops/.vagrant
 .lein-deps-sum
 lib/
 .DS_Store
+start_dev_environment.sh

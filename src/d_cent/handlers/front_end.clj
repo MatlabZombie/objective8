@@ -82,4 +82,3 @@
                                             :message message
                                             :objective (assoc objective :end-date (utils/time-string->pretty-date (objective :end-date)))
                                             :signed-in (signed-in?)})))
-

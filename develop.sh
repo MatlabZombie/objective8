@@ -11,8 +11,12 @@ killall() {
     echo "done!"
 }
 
+if [ -a start_dev_environment.sh ]
+  then
+    source ./start_dev_environment.sh
+fi
 
-echo "[1] watching the scss  changes..."
+echo "[1] watching the scss changes..."
 grunt dev &
 
 echo "[2] automatically running the server tests on changes..."
