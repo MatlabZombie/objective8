@@ -1,6 +1,19 @@
 (ns d-cent.storage.storage
   (:require [korma.core :as korma]
-            [d-cent.storage.mappings :as mappings]))
+            [d-cent.storage.mappings :as mappings]
+            [d-cent.storage.database :as database]))
+
+(defprotocol Store
+  (init [this])
+  (store! [this map])
+  (retrieve [this query]))
+
+(defn request->store
+  "Fetches the store from the request"
+  [request]
+  (:store (:d-cent request)))
+
+;; PostGres store
 
 (defn insert
   "Wrapper around Korma's insert call"
@@ -37,29 +50,48 @@
   (if entity
     (let [result (select (mappings/get-mapping query) (-to_ (dissoc query :entity)))]
       {:query query
-       :result result}) 
+       :result result})
     (throw (Exception. "Query map requires an :entity key"))))
 
-(defn request->store
-  "Fetches the storage atom from the request"
-  [request]
-  (:store (:d-cent request)))
+(defrecord PostgresStore [spec]
+  Store
+  (init [this]
+    (database/connect! (:spec this))
+    this)
+  (store! [this m] (pg-store! m))
+  (retrieve [this query] (pg-retrieve query)))
 
-(defn gen-uuid [] (str (java.util.UUID/randomUUID)))
+;; In memory store
 
-(defn retrieve
-  "Retrieves a record from the in memory database"
-  [store collection id]
-  (first (filter #(= (:_id %) id) (get @store collection))))
+(defn gen-id [store-atom] (:__last-id (swap! store-atom update-in [:__last-id] inc)))
 
-(defn store! 
-  "Stores a record in the in memory database"
-  [store collection record]
-  (let [record-to-save (assoc record :_id (gen-uuid))]
-    (swap! store update-in [collection] conj record-to-save)
+(defn im-insert [entity data]
+  (throw (ex-info "not implemented")))
+
+(defn im-store! [store-atom record]
+  (let [record-to-save (assoc record :_id (gen-id store-atom))
+        collection (:entity record)]
+    (swap! store-atom update-in [collection] conj record-to-save)
     record-to-save))
 
 (defn find-by 
   "Retrieves the first record to match predicate"
   [store collection predicate]
   (first (filter predicate (get @store collection))))
+
+(defn is-submap? [map1 map2]
+  (= map1 (select-keys map2 (keys map1))))
+
+(defn im-retrieve [store-atom query]
+  (let [pred (partial is-submap? query)
+        collection (:entity query)
+        result (filter pred (collection @store-atom))]
+    {:query query
+     :result result}
+    ))
+
+(defrecord InMemoryStore [store-atom]
+  Store
+  (init [this] (assoc this :store-atom (atom {:__last-id 0})))
+  (store! [this m] (im-store! (:store-atom this) m))
+  (retrieve [this query] (im-retrieve (:store-atom this) query)))
