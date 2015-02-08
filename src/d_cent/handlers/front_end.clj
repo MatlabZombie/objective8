@@ -3,7 +3,6 @@
             [cemerick.friend :as friend]
             [ring.util.response :as response]
             [cheshire.core :as json]
-            [org.httpkit.client :as http]
             [d-cent.responses :refer :all]
             [d-cent.comments :refer [request->comment]]
             [d-cent.objectives :refer [request->objective]]

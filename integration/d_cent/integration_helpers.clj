@@ -28,10 +28,10 @@
    as database storage"
 
   ([]
-   (p/session (core/app core/app-config)))
+   (p/session (core/app (core/create-configuration))))
 
   ([test-store]
-   (p/session (core/app (assoc core/app-config :store test-store)))))
+   (p/session (core/app (core/create-configuration test-store)))))
 
 ;; Checkers for peridot responses
 (defn peridot-response-json-body->map [peridot-response]

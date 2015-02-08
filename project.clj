@@ -25,13 +25,16 @@
                  [org.clojure/java.jdbc "0.3.6"]
                  [postgresql "9.3-1102.jdbc41"]
                  [ragtime "0.3.8"]]
-  :main d-cent.core
-  :aot [d-cent.core]
+  :main d-cent.main
+  :aot [d-cent.main]
   :plugins [[ragtime/ragtime.lein "0.3.8"]]
-  :profiles {:dev {:dependencies [[midje "1.6.3"]
+  :profiles {:dev {:source-paths ["dev"]
+                   :repl-options {:init-ns user}
+                   :dependencies [[midje "1.6.3"]
                                   [ring/ring-mock "0.2.0"]
                                   [http-kit.fake "0.2.1"]
                                   [javax.servlet/servlet-api "2.5"]
+                                  [org.clojure/tools.namespace "0.2.9"]
                                   [peridot "0.3.1"]]
                    :plugins [[lein-midje "3.1.3"]
                              [jonase/eastwood "0.2.1"]]

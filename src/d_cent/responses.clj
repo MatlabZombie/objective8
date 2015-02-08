@@ -1,6 +1,5 @@
 (ns d-cent.responses
   (:require [net.cgrand.enlive-html :as html]
-            [d-cent.translation :refer [translation-config]]
             [d-cent.config :as config]
             [d-cent.utils :as utils]
             [ring.util.anti-forgery :refer [anti-forgery-field]]))
@@ -119,8 +118,8 @@
 
 (defn rendered-response [template-name args]
   (let [navigation (if (:signed-in args)
-                         global-navigation-signed-in
-                         global-navigation-signed-out)
+                     global-navigation-signed-in
+                     global-navigation-signed-out)
         page (render-template base (assoc args
                                           :content (template-name args)
                                           :flash-message (:message args)

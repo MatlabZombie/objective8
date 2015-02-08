@@ -1,6 +1,6 @@
 (ns d-cent.core
-  (:use [org.httpkit.server :only [run-server]])
-  (:require [clojure.tools.logging :as log]
+  (:require [org.httpkit.server :refer [run-server]]
+            [clojure.tools.logging :as log]
             [cemerick.friend :as friend]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
@@ -17,8 +17,7 @@
             [d-cent.workflows.twitter :refer [twitter-workflow]]
             [d-cent.workflows.sign-up :refer [sign-up-workflow]]
             [d-cent.handlers.api :as api-handlers]
-            [d-cent.handlers.front-end :as front-end-handlers])
-  (:gen-class))
+            [d-cent.handlers.front-end :as front-end-handlers]))
 
 ;; Custom ring middleware
 
@@ -67,45 +66,45 @@
 
    ])
 
-(defn app [app-config]
+(defn app [configuration]
   (-> (make-handler routes (some-fn handlers #(when (fn? %) %)))
-      (friend/authenticate (:authentication app-config))
-      (wrap-tower (:translation app-config))
+      (friend/authenticate (:authentication configuration))
+      (wrap-tower (:translation configuration))
       wrap-keyword-params
       wrap-params
       wrap-json-params
       wrap-json-response
       wrap-flash
       wrap-session
-      (inject-db (:store app-config))))
+      (inject-db (:store configuration))))
 
-(defonce server (atom nil))
-(defonce postgres-connection-pool (atom nil))
+(defn create-configuration
 
-(defonce in-memory-db (atom {}))
+  ([]
+   (create-configuration (atom {})))
 
-(def app-config
-  {:authentication {:allow-anon? true
-                    :workflows [twitter-workflow,
-                                sign-up-workflow]
-                    :login-uri "/sign-in"}
-   :translation translation-config
-   :store in-memory-db})
+  ([store]
+   {:authentication {:allow-anon? true
+                     :workflows [twitter-workflow
+                                 sign-up-workflow]
+                     :login-uri "/sign-in"}
+    :translation translation-config
+    :store store
+    :port (Integer/parseInt (config/get-var "PORT" "8080"))}))
 
-(defn start-server []
-  (let [port (Integer/parseInt (config/get-var "PORT" "8080"))]
-    (reset! postgres-connection-pool (db/connect! db/postgres-spec))
-    (log/info (str "Starting d-cent on port " port))
-    (reset! server (run-server (app app-config) {:port port}))))
+(defn start [{:keys [port] :as configuration}]
+  (log/info (str "Starting d-cent on port " port))
+  (let [server (run-server (app configuration) {:port port})
+        postgres-connection-pool (db/connect! db/postgres-spec)]
+    (assoc configuration
+           :server server
+           :db-connection-pool postgres-connection-pool)))
 
-(defn -main []
-  (start-server))
+(defn stop [configuration]
+  (when-let [server (:server configuration)]
+    (server))
+  (dissoc configuration :server :db-connection-pool))
 
-(defn stop-server []
-  (when-not (nil? @server)
-    (@server)
-    (reset! server nil)))
-
-(defn restart-server []
-  (stop-server)
-  (start-server))
+(defn main [& args]
+  (-> (create-configuration)
+      start))

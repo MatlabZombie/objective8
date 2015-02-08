@@ -22,17 +22,16 @@
        (oauth/access-token anything anything anything) => {:user_id USER_ID}
        (http-api/create-user anything) => {:_id USER_ID})
       (let [store (atom {})
-              app-config (into core/app-config {:store store})
-              user-session (p/session (core/app app-config))
-              params {:comment "The comment"
-                      :objective-id OBJECTIVE_ID}
-              response (:response
-                         (-> user-session
-                             (helpers/with-sign-in (str "http://localhost:8080/objectives/" OBJECTIVE_ID))
-                             (p/request "http://localhost:8080/comments"
-                                        :request-method :post
-                                        :params params)))]
-          (:flash response) => (contains "Your comment has been added!")
-          (-> response
-              :headers
-              (get "Location")) => (contains (str "/objectives/" OBJECTIVE_ID)))))
+            user-session (helpers/test-context store)
+            params {:comment "The comment"
+                    :objective-id OBJECTIVE_ID}
+            response (:response
+                      (-> user-session
+                          (helpers/with-sign-in (str "http://localhost:8080/objectives/" OBJECTIVE_ID))
+                          (p/request "http://localhost:8080/comments"
+                                     :request-method :post
+                                     :params params)))]
+        (:flash response) => (contains "Your comment has been added!")
+        (-> response
+            :headers
+            (get "Location")) => (contains (str "/objectives/" OBJECTIVE_ID)))))

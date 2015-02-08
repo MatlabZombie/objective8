@@ -12,6 +12,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.synced_folder "../", "/var/dcent"
 
+  config.vm.provider :virtualbox do |vbox|
+    vbox.customize ["modifyvm", :id, "--memory", 1024]
+  end
+
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "development_playbook.yml"
     ansible.inventory_path = "development.inventory"

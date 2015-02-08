@@ -18,8 +18,7 @@
 (def objectives-post-request (mock/request :post "/objectives"))
 (def objective-view-get-request (mock/request :get (str "/objectives/" OBJECTIVE_ID)))
 
-(def default-app (core/app core/app-config))
-
+(def default-app (core/app (core/create-configuration)))
 
 (binding [config/enable-csrf false]
   (fact "authorised user can post and retrieve objective"
