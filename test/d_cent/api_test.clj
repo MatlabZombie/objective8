@@ -76,9 +76,7 @@
                            :title "Objective title"
                            :goals "Objective goals"
                            :description "Objective description"
-                           :end-date (utils/time-string->date-time "2015-01-31T00:00:00.000Z")
-                           :user-guid USER_ID
-                           }))
+                           :end-date (utils/time-string->date-time "2015-01-31T00:00:00.000Z")}))
        (fact "returns api-failure when no objective found"
              (with-fake-http [(str host-url "/api/v1/objectives/" OBJECTIVE_ID)
                               {:status 404}]
@@ -91,7 +89,7 @@
                   :objective-id OBJECTIVE_ID
                   :username "my username"})
 
-(def the-stored-comment (into the-comment {:_id "GUID"}))
+(def the-stored-comment (into the-comment {:_id 1}))
 (def comment-response
   {:successful {:status 201
                 :headers {"Content-Type" "application/json"}
